@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+from pathlib import Path
+import shutil
+import tempfile
 import unittest
 import validate as v
 
@@ -7,7 +10,34 @@ class Tests(unittest.TestCase):
     def test_current_lists(self):
         data = v.validate()
         self.assertEqual(set(data), set(v.NAMES))
-        self.assertEqual([len(data[n]) for n in v.NAMES], [23, 9, 3, 6, 15, 4])
+        self.assertEqual([len(data[n]) for n in v.NAMES], [41, 15, 4])
+
+    def test_merge_preserves_exact_order_and_coverage(self):
+        before = []
+        for name in v.COMPAT_NAMES:
+            before.extend(v.parse((v.ROOT / "rules" / name).read_text()))
+        self.assertEqual(v.validate()["Claude.list"], before)
+
+    def test_merge_guard_rejects_missing_reordered_and_edited_compat(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            shutil.copytree(v.ROOT / "rules", root / "rules")
+            merged = root / "rules" / "Claude.list"
+            original = merged.read_text()
+            for modified in (
+                original.replace("DOMAIN-SUFFIX,anthropic.com\n", ""),
+                original.replace(
+                    "DOMAIN-SUFFIX,anthropic.com\nDOMAIN-SUFFIX,anthropic.team",
+                    "DOMAIN-SUFFIX,anthropic.team\nDOMAIN-SUFFIX,anthropic.com"),
+            ):
+                merged.write_text(modified)
+                with self.assertRaises(ValueError):
+                    v.validate(root)
+            merged.write_text(original)
+            compat = root / "rules" / v.COMPAT_NAMES[0]
+            compat.write_text(compat.read_text() + "# edited\n")
+            with self.assertRaises(ValueError):
+                v.validate(root)
 
     def test_invalid_or_unsafe_rules(self):
         for text in (
