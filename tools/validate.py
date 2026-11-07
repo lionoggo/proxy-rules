@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 """只读共享名单格式/已审核范围检查；无部署或网络操作。"""
+import hashlib
 import ipaddress
 from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-NAMES = (
+COMPAT_NAMES = (
     "Claude.Core.list", "Claude.Auxiliary.list", "Claude.Inbound.list",
-    "Claude.LegacyCompatibility.list", "OpenAI.Core.list", "Cursor.Core.list",
+    "Claude.LegacyCompatibility.list",
+)
+NAMES = ("Claude.list", "OpenAI.Core.list", "Cursor.Core.list")
+COMPAT_HASHES = (
+    "68e83c1e2e46dac1b3cd6c5c1acc10ebbbf83b70d8aab3f00b3402e54b14e01d",
+    "3b8bcbf99e5045ff8ee88c2d6327aecd98246ba79d59565c982b540237ca414e",
+    "af967c35f98829a6542c100b35733eba1be3b0ce94ef626363bbf20ac5b837ea",
+    "c008c6d112db89ed3c55fc117db245c2a4f8d2e9a1d8fcae2a7d744d54af2c9f",
 )
 IP_TYPES = {"IP-CIDR", "IP-CIDR6", "IP-ASN"}
 DOMAIN = re.compile(r"[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+")
@@ -55,9 +63,21 @@ def parse(text):
 
 def validate(root=ROOT):
     files = {path.name for path in (root / "rules").iterdir() if path.is_file()}
-    if files != set(NAMES):
+    if files != set(NAMES + COMPAT_NAMES):
         raise ValueError("文件白名单改变，先审核发布范围")
     data = {name: parse((root / "rules" / name).read_text()) for name in NAMES}
+    baseline = []
+    for name, expected_hash in zip(COMPAT_NAMES, COMPAT_HASHES):
+        content = (root / "rules" / name).read_bytes()
+        if hashlib.sha256(content).hexdigest() != expected_hash:
+            raise ValueError("旧Claude订阅只保留兼容，不再修改；日常维护Claude.list")
+        baseline.extend(parse(content.decode()))
+    positions = {row: i for i, row in enumerate(data["Claude.list"])}
+    if not set(baseline) <= positions.keys():
+        raise ValueError("Claude合并基线缺失；删除需要单独审核客户端兜底")
+    indices = [positions[row] for row in baseline]
+    if indices != sorted(indices):
+        raise ValueError("Claude原有规则相对顺序改变，需单独审核")
     expected_domains = {
         "anthropic.com", "anthropic.team", "claude.ai", "claude.com", "claude.app",
         "claude.dev", "claude.new", "claude.site", "clau.de", "claudeacademy.com",
@@ -65,13 +85,13 @@ def validate(root=ROOT):
         "claudestudio.com", "claudeusercontent.com", "chatbotclaude.com",
         "ant.dev", "antspace.dev", "statsig.anthropic.com",
     }
-    if not {("DOMAIN-SUFFIX", domain) for domain in expected_domains} <= set(data["Claude.Core.list"]):
+    if not {("DOMAIN-SUFFIX", domain) for domain in expected_domains} <= set(data["Claude.list"]):
         raise ValueError("Claude核心基线缺失；删除需要单独审核客户端兜底")
-    if set(data["Claude.Inbound.list"]) != {
+    if not {
         ("IP-CIDR", "160.79.104.0/23", "no-resolve"),
         ("IP-CIDR", "153.61.224.0/22", "no-resolve"),
         ("IP-CIDR6", "2607:6bc0::/48", "no-resolve"),
-    }:
+    } <= set(data["Claude.list"]):
         raise ValueError("官方目标IP基线改变，需同步审核")
     if any(row[1] == "153.61.208.0/20" for rows in data.values() for row in rows):
         raise ValueError("不能混入云端出站来源段")

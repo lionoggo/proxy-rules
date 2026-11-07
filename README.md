@@ -4,14 +4,13 @@
 
 | 列表 | 用途 | 初始条数 |
 | --- | --- | --- |
-| `rules/Claude.Core.list` | Claude 核心域名、认证/CDN及专用 Statsig | 23 |
-| `rules/Claude.Auxiliary.list` | 共享辅助服务；会影响其他应用 | 9 |
-| `rules/Claude.Inbound.list` | 客户端访问的官方入站目标网段 | 3 |
-| `rules/Claude.LegacyCompatibility.list` | 原有宽关键词、网段与ASN兼容范围 | 6 |
+| `rules/Claude.list` | Claude 核心、共享辅助服务、入站网段及历史兼容范围 | 41 |
 | `rules/OpenAI.Core.list` | OpenAI/ChatGPT 目标 | 15 |
 | `rules/Cursor.Core.list` | Cursor 目标 | 4 |
 
-初始内容于 2026-11-07 从已审核、已部署列表迁入，保持字节一致。文件中的历史“生成产物”注释描述原来源；本仓库直接维护 `rules/`，不再生成重复的 `dist/`。来源与适用边界见 [SOURCES.md](SOURCES.md)。
+初始内容于 2026-11-07 从已审核、已部署列表迁入。Claude 四份名单已按原顺序合成 `Claude.list`，41 条匹配条件完全等价，文件内用注释区分范围。本仓库直接维护 `rules/`，不再生成重复的 `dist/`。来源与适用边界见 [SOURCES.md](SOURCES.md)。
+
+旧 `Claude.Core.list`、`Claude.Auxiliary.list`、`Claude.Inbound.list`、`Claude.LegacyCompatibility.list` 保留原字节，供旧客户端和回滚使用，**冻结且不再同步新修改**。日常只维护 `Claude.list`，不要继续订阅四份旧名单，也不要同时订阅新旧名单。旧文件的历史“生成产物”注释描述原来源。
 
 ## 订阅
 
@@ -24,27 +23,27 @@ https://raw.githubusercontent.com/lionoggo/proxy-rules/main/rules/<文件名>
 Surge 示例：
 
 ```ini
-RULE-SET,https://raw.githubusercontent.com/lionoggo/proxy-rules/main/rules/Claude.Core.list,Claude,no-resolve,update-interval=3600
+RULE-SET,https://raw.githubusercontent.com/lionoggo/proxy-rules/main/rules/Claude.list,Claude,no-resolve,update-interval=3600
 ```
 
 Nikki/Mihomo 示例：
 
 ```yaml
 rule-providers:
-  ManagedClaudeCore:
+  ManagedClaude:
     type: http
     behavior: classical
     format: text
-    url: https://raw.githubusercontent.com/lionoggo/proxy-rules/main/rules/Claude.Core.list
-    path: ./providers/rule/shared/Claude.Core.list
+    url: https://raw.githubusercontent.com/lionoggo/proxy-rules/main/rules/Claude.list
+    path: ./providers/rule/shared/Claude.list
     interval: 3600
     proxy: 自建代理
 
 rules:
-  - RULE-SET,ManagedClaudeCore,Claude,no-resolve
+  - RULE-SET,ManagedClaude,Claude,no-resolve
 ```
 
-例子不是完整配置。其余五份列表使用各自独立的 URL／缓存路径。名单没有策略字段，IP/ASN 行保留 `no-resolve`；不能当作 domain/ipcidr/mrs 格式加载。
+例子不是完整配置。OpenAI 和 Cursor 使用各自独立的 URL／缓存路径。名单没有策略字段，IP/ASN 行保留 `no-resolve`；不能当作 domain/ipcidr/mrs 格式加载。合并时只替换四个连续的 Claude 引用，原有精确例外、策略组和静态拒绝兜底保持位置不变。
 
 ## 本地策略不随订阅同步
 
@@ -55,7 +54,7 @@ rules:
 
 ## 更新
 
-1. 只修改 `rules/`，不添加凭据、订阅URL或设备信息。
+1. 只修改三个正式名单，不修改冻结的四份兼容文件，不添加凭据、订阅URL或设备信息。
 2. 运行 `python3 tools/validate.py` 和 `python3 tools/test_validate.py`。
 3. 通过 PR，校验成功后合入 `main`；不自动合并第三方内容。
 4. 两端原生每小时检查，无需另行部署完整配置。文档／工具改动不改变规则内容。
