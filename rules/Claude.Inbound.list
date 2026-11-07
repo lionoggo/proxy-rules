@@ -1,0 +1,6 @@
+# 审核后的共享列表；由 tools/build.py 生成，接入状态见实施记录。
+# 同时供 Surge RULE-SET 与 Mihomo classical/text 使用，无代理策略。
+# 源文件：rules/Claude.Inbound.list；证据与边界见 README.md。
+IP-CIDR,160.79.104.0/23,no-resolve
+IP-CIDR,153.61.224.0/22,no-resolve
+IP-CIDR6,2607:6bc0::/48,no-resolve

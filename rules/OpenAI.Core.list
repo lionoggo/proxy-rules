@@ -1,0 +1,18 @@
+# 审核后的共享列表；由 tools/build.py 生成，接入状态见实施记录。
+# 同时供 Surge RULE-SET 与 Mihomo classical/text 使用，无代理策略。
+# 源文件：rules/OpenAI.Core.list；证据与边界见 README.md。
+DOMAIN-SUFFIX,openai.com
+DOMAIN-SUFFIX,chatgpt.com
+DOMAIN-SUFFIX,chatgpt.site
+DOMAIN-SUFFIX,chat.com
+DOMAIN-SUFFIX,ai.com
+DOMAIN-SUFFIX,oaistatic.com
+DOMAIN-SUFFIX,oaiusercontent.com
+DOMAIN-SUFFIX,sora.com
+DOMAIN,openai-api.arkoselabs.com
+DOMAIN-SUFFIX,client-api.arkoselabs.com
+DOMAIN-SUFFIX,chatgpt.livekit.cloud
+DOMAIN-SUFFIX,host.livekit.cloud
+DOMAIN-SUFFIX,turn.livekit.cloud
+DOMAIN-SUFFIX,featuregates.org
+DOMAIN-SUFFIX,oaistatsig.com

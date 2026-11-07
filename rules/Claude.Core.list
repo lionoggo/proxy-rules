@@ -1,0 +1,26 @@
+# 审核后的共享列表；由 tools/build.py 生成，接入状态见实施记录。
+# 同时供 Surge RULE-SET 与 Mihomo classical/text 使用，无代理策略。
+# 源文件：rules/Claude.Core.list；证据与边界见 README.md。
+DOMAIN-SUFFIX,anthropic.com
+DOMAIN-SUFFIX,anthropic.team
+DOMAIN-SUFFIX,claude.ai
+DOMAIN-SUFFIX,claude.com
+DOMAIN-SUFFIX,claude.app
+DOMAIN-SUFFIX,claude.dev
+DOMAIN-SUFFIX,claude.new
+DOMAIN-SUFFIX,claude.site
+DOMAIN-SUFFIX,clau.de
+DOMAIN-SUFFIX,claudeacademy.com
+DOMAIN-SUFFIX,claudemcpclient.com
+DOMAIN-SUFFIX,claudemcpcontent.com
+DOMAIN-SUFFIX,claudepages.dev
+DOMAIN-SUFFIX,claudestudio.com
+DOMAIN-SUFFIX,claudeusercontent.com
+DOMAIN-SUFFIX,chatbotclaude.com
+DOMAIN-SUFFIX,ant.dev
+DOMAIN-SUFFIX,antspace.dev
+DOMAIN,servd-anthropic-website.b-cdn.net
+DOMAIN,anthropic.com.cdn.cloudflare.net
+DOMAIN,anthropic.auth0.com
+DOMAIN,anthropic-com.ghost.io
+DOMAIN-SUFFIX,statsig.anthropic.com

@@ -1,0 +1,9 @@
+# 审核后的共享列表；由 tools/build.py 生成，接入状态见实施记录。
+# 同时供 Surge RULE-SET 与 Mihomo classical/text 使用，无代理策略。
+# 源文件：rules/Claude.LegacyCompatibility.list；证据与边界见 README.md。
+DOMAIN-KEYWORD,sentry
+DOMAIN-KEYWORD,datadog
+DOMAIN-KEYWORD,sift
+IP-CIDR,160.79.104.0/21,no-resolve
+IP-CIDR6,2607:6bc0::/32,no-resolve
+IP-ASN,399358,no-resolve
